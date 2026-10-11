@@ -1,0 +1,13 @@
+# The shipped js/config.js contains public settings and should be committed.
+# If you later use an API that needs secrets, keep them out of Git.
+.env
+.env.*
+!.env.example
+js/config.local.js
+node_modules/
+dist/
+.DS_Store
+Thumbs.db
+*.log
+*.zip
+.vscode/

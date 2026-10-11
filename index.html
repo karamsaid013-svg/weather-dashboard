@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A simple weather dashboard with city search, current conditions, and a five-day forecast. No API key required.">
+  <meta name="theme-color" content="#f7f8fa">
+  <title>Weather Dashboard | Assignment 4</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/weather.js" defer></script>
+  <script src="js/script.js" defer></script>
+</head>
+<body>
+  <!-- Local SVG symbols keep the icons available without a CDN or image request. -->
+  <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+    <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="icon-location" viewBox="0 0 24 24"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5m-4.5-4a8 8 0 0 1 13-3L20 8M4 16l2.5 3a8 8 0 0 0 13-3"/></symbol>
+    <symbol id="icon-sun" viewBox="0 0 64 64"><circle cx="32" cy="32" r="13" fill="#ffcd65" stroke="#e5a63b"/><path d="M32 5v7m0 40v7M5 32h7m40 0h7M13 13l5 5m28 28 5 5M13 51l5-5m28-28 5-5" stroke="#e5a63b"/></symbol>
+    <symbol id="icon-moon" viewBox="0 0 64 64"><path d="M46 45A22 22 0 0 1 23 10a23 23 0 1 0 31 30c-2 2-5 4-8 5Z" fill="#dde4fb" stroke="#889ecd"/><path d="M46 10v8m-4-4h8m4 9v5m-2.5-2.5h5" stroke="#889ecd"/></symbol>
+    <symbol id="icon-cloud" viewBox="0 0 64 64"><path d="M16 48a12 12 0 0 1-1-24 17 17 0 0 1 32-4 14 14 0 0 1 1 28Z" fill="#e8eff7" stroke="#9bb1ca"/></symbol>
+    <symbol id="icon-partly-cloudy-day" viewBox="0 0 64 64"><circle cx="24" cy="22" r="11" fill="#ffcd65" stroke="#e5a63b"/><path d="M24 4v5M6 22h5m2-13 4 4m20-4-4 4" stroke="#e5a63b"/><path d="M20 52a11 11 0 0 1-1-22 15 15 0 0 1 28-4 13 13 0 0 1 1 26Z" fill="#e8eff7" stroke="#9bb1ca"/></symbol>
+    <symbol id="icon-partly-cloudy-night" viewBox="0 0 64 64"><path d="M30 28A17 17 0 0 1 20 7a17 17 0 1 0 23 21 18 18 0 0 1-13 0Z" fill="#dde4fb" stroke="#889ecd"/><path d="M20 52a11 11 0 0 1-1-22 15 15 0 0 1 28-4 13 13 0 0 1 1 26Z" fill="#e8eff7" stroke="#9bb1ca"/></symbol>
+    <symbol id="icon-fog" viewBox="0 0 64 64"><path d="M16 37a10 10 0 0 1-1-20 16 16 0 0 1 30-3 12 12 0 0 1 2 23Z" fill="#e8eff7" stroke="#9bb1ca"/><path d="M8 45h48M15 53h33M25 61h17" stroke="#9bb1ca"/></symbol>
+    <symbol id="icon-drizzle" viewBox="0 0 64 64"><path d="M16 37a10 10 0 0 1-1-20 16 16 0 0 1 30-3 12 12 0 0 1 2 23Z" fill="#e8eff7" stroke="#9bb1ca"/><path d="m20 45-2 5m16-5-2 5m16-5-2 5m-24 5-1 3m16-3-1 3" stroke="#559de2"/></symbol>
+    <symbol id="icon-rain" viewBox="0 0 64 64"><path d="M16 37a10 10 0 0 1-1-20 16 16 0 0 1 30-3 12 12 0 0 1 2 23Z" fill="#dce7f2" stroke="#91a8c2"/><path d="m21 44-4 10m17-10-4 10m17-10-4 10" stroke="#559de2"/></symbol>
+    <symbol id="icon-snow" viewBox="0 0 64 64"><path d="M16 36a10 10 0 0 1-1-20 16 16 0 0 1 30-3 12 12 0 0 1 2 23Z" fill="#e8eff7" stroke="#9bb1ca"/><path d="M20 44v12m-5-9 10 6m0-6-10 6m29-9v12m-5-9 10 6m0-6-10 6" stroke="#75acce"/></symbol>
+    <symbol id="icon-storm" viewBox="0 0 64 64"><path d="M16 37a10 10 0 0 1-1-20 16 16 0 0 1 30-3 12 12 0 0 1 2 23Z" fill="#dce2ed" stroke="#889db8"/><path d="m34 33-9 15h9l-7 14 18-21h-9l8-8" fill="#ffcd65" stroke="#e5a63b"/></symbol>
+    <symbol id="icon-wind" viewBox="0 0 24 24"><path d="M3 8h12a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h7a3 3 0 1 1-3 3"/></symbol>
+    <symbol id="icon-droplet" viewBox="0 0 24 24"><path d="M12 2C9 7 5 10 5 15a7 7 0 0 0 14 0c0-5-4-8-7-13Z"/><path d="M9 15a3 3 0 0 0 3 3"/></symbol>
+    <symbol id="icon-thermometer" viewBox="0 0 24 24"><path d="M9 14V5a3 3 0 0 1 6 0v9a5 5 0 1 1-6 0Z"/><path d="M12 8v9"/><circle cx="12" cy="18" r="1.5" fill="currentColor"/></symbol>
+    <symbol id="icon-pressure" viewBox="0 0 24 24"><path d="M5 19a9 9 0 1 1 14 0H5Z"/><path d="m12 13 4-5M6 11h1m10 0h1M9 6l.5 1M15 6l-.5 1"/><circle cx="12" cy="13" r="1.5"/></symbol>
+    <symbol id="icon-sunrise" viewBox="0 0 24 24"><path d="M3 18h18M4 22h16M7 18a5 5 0 0 1 10 0M12 2v7m-3-3 3-3 3 3M3 10l2 2m16-2-2 2"/></symbol>
+    <symbol id="icon-sunset" viewBox="0 0 24 24"><path d="M3 18h18M4 22h16M7 18a5 5 0 0 1 10 0M12 2v7m-3-3 3 3 3-3M3 10l2 2m16-2-2 2"/></symbol>
+  </svg>
+
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Weather Dashboard home">
+        <span class="brand-mark"><svg class="weather-symbol" aria-hidden="true"><use href="#icon-partly-cloudy-day"></use></svg></span>
+        <span>Weather<span class="brand-light"> Dashboard</span></span>
+      </a>
+      <span class="assignment-label">Assignment 4 <span aria-hidden="true">/</span> JavaScript</span>
+    </header>
+
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow">A little clarity for your day</p>
+        <h1>Weather Dashboard</h1>
+        <p class="page-subtitle">Find a city. Check the sky. Make your plans.</p>
+      </div>
+      <div class="heading-sun" aria-hidden="true"><svg class="weather-symbol"><use href="#icon-sun"></use></svg></div>
+    </div>
+
+    <section class="search-panel" aria-label="Search for weather">
+      <form id="weather-form" class="search-form" novalidate>
+        <div class="search-field">
+          <label for="city-input">Where are you headed?</label>
+          <div class="input-wrap">
+            <svg class="icon search-icon" aria-hidden="true"><use href="#icon-search"></use></svg>
+            <input id="city-input" type="search" name="city" placeholder="Search a city, e.g. Beirut" autocomplete="off" minlength="2" maxlength="100" aria-describedby="search-hint" required>
+          </div>
+        </div>
+        <button id="search-button" class="button button-primary" type="submit">Search weather <svg class="icon" aria-hidden="true"><use href="#icon-arrow"></use></svg></button>
+      </form>
+      <p id="search-hint" class="search-hint">Try a city name, or add a country: “Paris, France”.</p>
+
+      <section id="location-picker" class="location-picker" aria-label="Choose a matching location" hidden>
+        <h2>Choose your city</h2>
+        <p>We found a few matches. Pick the location you mean.</p>
+        <div id="location-options" class="location-options"></div>
+      </section>
+    </section>
+
+    <div id="recent-searches" class="recent-searches">
+      <div class="recent-label"><span>Recent searches</span><button id="clear-history" class="text-button" type="button">Clear history</button></div>
+      <div id="recent-buttons" class="recent-buttons"></div>
+    </div>
+
+    <div class="dashboard-toolbar">
+      <p class="section-kicker">Your weather, at a glance</p>
+      <div class="toolbar-actions">
+        <button id="refresh-button" class="button button-quiet refresh-button" type="button" hidden><svg class="icon" aria-hidden="true"><use href="#icon-refresh"></use></svg> Refresh</button>
+        <div class="unit-toggle" role="group" aria-label="Temperature unit">
+          <button id="celsius-button" type="button" aria-pressed="true" aria-label="Use Celsius">°C</button>
+          <button id="fahrenheit-button" type="button" aria-pressed="false" aria-label="Use Fahrenheit">°F</button>
+        </div>
+      </div>
+    </div>
+
+    <p id="loading" class="loading-message" role="status" aria-live="polite" hidden>Finding the latest weather…</p>
+    <div id="error" class="error-panel" role="alert" hidden>
+      <div><strong>Something needs your attention</strong><p id="error-message"></p></div>
+      <button id="retry-button" class="button button-quiet" type="button" hidden>Try again</button>
+    </div>
+
+    <main id="dashboard" class="dashboard" aria-busy="false">
+      <section id="empty-state" class="empty-state" aria-label="Start a weather search">
+        <div class="empty-illustration" aria-hidden="true"><svg class="weather-symbol"><use href="#icon-partly-cloudy-day"></use></svg></div>
+        <p class="eyebrow">A world of weather</p>
+        <h2>Your next forecast starts here.</h2>
+        <p>Search for a city above to see current conditions and the next five days.</p>
+        <div class="suggestions" aria-label="Suggested cities">
+          <button class="suggestion-button" type="button" data-city="Beirut">Beirut <svg class="icon" aria-hidden="true"><use href="#icon-arrow"></use></svg></button>
+          <button class="suggestion-button" type="button" data-city="Paris">Paris <svg class="icon" aria-hidden="true"><use href="#icon-arrow"></use></svg></button>
+          <button class="suggestion-button" type="button" data-city="Tokyo">Tokyo <svg class="icon" aria-hidden="true"><use href="#icon-arrow"></use></svg></button>
+        </div>
+      </section>
+
+      <section id="weather-content" class="weather-content" aria-label="Weather results" hidden>
+        <div class="current-layout">
+          <section class="current-card" aria-label="Current weather">
+            <div class="current-topline"><span class="live-label"><span aria-hidden="true"></span> Current conditions</span><svg class="icon" aria-hidden="true"><use href="#icon-location"></use></svg></div>
+            <h2 id="city-name">—</h2>
+            <p id="country-name" class="country-name">—</p>
+            <div class="weather-main">
+              <div><p id="temperature" class="temperature">—</p><p id="description" class="weather-description">—</p></div>
+              <div id="weather-icon" class="current-weather-icon" aria-hidden="true"></div>
+            </div>
+            <div class="current-bottomline"><p id="today-range">—</p><p id="updated-time">—</p></div>
+          </section>
+
+          <section class="metrics-grid" aria-label="Weather details">
+            <div class="metric-card"><div class="metric-heading"><span class="metric-icon warm"><svg class="icon" aria-hidden="true"><use href="#icon-thermometer"></use></svg></span><h3>Feels like</h3></div><p id="feels-like" class="metric-value">—</p><p class="metric-caption">How it feels outside</p></div>
+            <div class="metric-card"><div class="metric-heading"><span class="metric-icon blue"><svg class="icon" aria-hidden="true"><use href="#icon-droplet"></use></svg></span><h3>Humidity</h3></div><p id="humidity" class="metric-value">—</p><p class="metric-caption">Moisture in the air</p></div>
+            <div class="metric-card"><div class="metric-heading"><span class="metric-icon teal"><svg class="icon" aria-hidden="true"><use href="#icon-wind"></use></svg></span><h3>Wind speed</h3></div><p id="wind-speed" class="metric-value">—</p><p class="metric-caption">At 10 meters above ground</p></div>
+            <div class="metric-card"><div class="metric-heading"><span class="metric-icon violet"><svg class="icon" aria-hidden="true"><use href="#icon-pressure"></use></svg></span><h3>Pressure</h3></div><p id="pressure" class="metric-value">—</p><p class="metric-caption">At ground level</p></div>
+          </section>
+        </div>
+
+        <section class="daylight-panel" aria-label="Sunrise and sunset">
+          <div class="daylight-item"><span class="daylight-icon sunrise"><svg class="icon" aria-hidden="true"><use href="#icon-sunrise"></use></svg></span><div><h3>Sunrise</h3><p id="sunrise">—</p></div></div>
+          <div class="daylight-item"><span class="daylight-icon sunset"><svg class="icon" aria-hidden="true"><use href="#icon-sunset"></use></svg></span><div><h3>Sunset</h3><p id="sunset">—</p></div></div>
+          <p id="timezone-label" class="timezone-label">Times shown in the city’s local time</p>
+        </section>
+
+        <section class="forecast-section" aria-labelledby="forecast-title">
+          <div class="forecast-heading"><div><p class="eyebrow">Looking ahead</p><h2 id="forecast-title">5-day forecast</h2></div><p>Daily highs, lows &amp; rain chance</p></div>
+          <div id="forecast-grid" class="forecast-grid"></div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> <span aria-hidden="true">·</span> Locations by <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer">GeoNames</a> <span aria-hidden="true">·</span> <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></p>
+      <p>No API key needed. <span>Built with HTML, CSS &amp; JavaScript.</span></p>
+    </footer>
+  </div>
+  <noscript><p class="noscript-message">Please enable JavaScript to search for weather.</p></noscript>
+</body>
+</html>
